@@ -12,6 +12,11 @@ export const createUserValidationSchema = Joi.object({
     .required()
 })
 
+export const updateUserValidationSchema = Joi.object({
+  fullName: Joi.string().min(3).max(50).message("Name must be between 30 to 50 characters long"),
+  age: Joi.number().min(2).max(100).message("Invalid Age")
+})
+
 export const fetchUserDetailsSchema = Joi.object({
   id: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
@@ -20,3 +25,7 @@ export const fetchUserDetailsSchema = Joi.object({
       'string.pattern.base': 'Invalid user id'
     })
 });
+
+export const verifyUserDetailsSchema = Joi.object({
+  token: Joi.string().required()
+})

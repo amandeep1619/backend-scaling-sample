@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { CustomError, GlobalResponse } from '../interfaces/customError'
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from './constants';
+import jwt from 'jsonwebtoken'
 // Constants (replacing private class members)
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS as string) || 10;
 
@@ -35,12 +36,12 @@ export const handleError = (error: unknown): never => {
  * Sends a successful JSON response
  */
 export const handleSuccessResponse = (props: GlobalResponse): Response => {
-  const { 
-    data = [], 
-    message = HTTP_STATUS_MESSAGES.OK, 
-    res, 
+  const {
+    data = [],
+    message = HTTP_STATUS_MESSAGES.OK,
+    res,
     status = HTTP_STATUS.OK,
-    error 
+    error
   } = props;
 
   // Use the renamed variable here
@@ -79,4 +80,14 @@ export const handleErrorResponse = (res: Response, errorDetails: CustomError | u
     data: [],
     error: errorDetails
   });
+};
+
+export const generateActivationLink = (userId: string): string => {
+  const token = jwt.sign(
+    { sub: userId },
+    process.env.JWT_ACTIVATION_SECRET!,
+    { expiresIn: '24h' }
+  );
+  const url = process.env.ACTIVATION_REDIRECT_URL_LOCAL as string + "?token=" + token
+  return url
 };

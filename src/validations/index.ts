@@ -4,7 +4,7 @@ import { handleErrorResponse } from '../lib/utils';
 import { CustomError } from '../interfaces/customError';
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from '../lib/constants';
 import { AuthenticatedRequest } from '../interfaces/common';
-import { createUserValidationSchema, fetchUserDetailsSchema } from './user.validations';
+import { createUserValidationSchema, fetchUserDetailsSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
 
 const getRequestErrors = (schema: Joi.Schema) => {
   return (
@@ -12,8 +12,8 @@ const getRequestErrors = (schema: Joi.Schema) => {
     res: Response,
     next: NextFunction
   ) => {
-    const { params, body } = req as Request;
-    const requestBody = { ...params, ...body };
+    const { params, body, query } = req as Request;
+    const requestBody = { ...params, ...body, ...query };
 
     const { error } = schema.validate(requestBody, {
       abortEarly: false,
@@ -64,6 +64,8 @@ const isRequired = (message: string): boolean => {
 export const validations = {
   userValidations: {
     createUserValidations: getRequestErrors(createUserValidationSchema),
-    validateUserId: getRequestErrors(fetchUserDetailsSchema)
+    validateUserId: getRequestErrors(fetchUserDetailsSchema),
+    updateUserValidations: getRequestErrors(updateUserValidationSchema),
+    verifyUserValidations: getRequestErrors(verifyUserDetailsSchema)
   }
 }

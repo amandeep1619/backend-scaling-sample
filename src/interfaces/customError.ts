@@ -20,6 +20,6 @@ export class CustomError implements ICustomError {
 
 export interface GlobalResponse extends ICustomError {
   res: Response
-  data?: unknown
-  error?: unknown
+  data?: any
+  error?: any
 }

@@ -3,6 +3,10 @@ export interface ICreateUser {
   password: string
 }
 
+export interface IUpdateUser {
+  fullName: string
+  age: number
+}
 
 export interface IUpdateUserDetails {
   id: string

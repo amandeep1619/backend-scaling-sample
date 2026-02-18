@@ -9,16 +9,18 @@ const userSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      index: true
     },
     password: {
       type: String,
       required: true
     },
-    fullname: {
+    fullName: {
       type: String,
       required: false,
       trim: true,
-      default: false
+      default: null,
+      index: true
     },
     age: {
       type: Number,
