@@ -3,6 +3,7 @@ import { handleErrorResponse, handleSuccessResponse } from "../lib/utils";
 import { userService } from "../services/users";
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from "../lib/constants";
 import { CustomError } from "../interfaces/customError";
+import { authService } from "../services/auth";
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -47,6 +48,15 @@ export const verifyUser = async (req: Request, res: Response) => {
   try {
     await userService.verifyUserAccount(req.query.token as string)
     return handleSuccessResponse({ res, message: HTTP_STATUS_MESSAGES.OK })
+  } catch (error) {
+    return handleErrorResponse(res, error)
+  }
+}
+
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const loginResponse = await authService.login(req.body)
+    return handleSuccessResponse({ res, data: [loginResponse], message: HTTP_STATUS_MESSAGES.OK})
   } catch (error) {
     return handleErrorResponse(res, error)
   }

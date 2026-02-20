@@ -29,3 +29,14 @@ export const fetchUserDetailsSchema = Joi.object({
 export const verifyUserDetailsSchema = Joi.object({
   token: Joi.string().required()
 })
+
+export const loginUserRequestSchema = Joi.object({
+  email: Joi.string().required().email(),
+  password: Joi.string().required()
+    .min(8)
+    .regex(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+    .message(
+      INVALID_PASSWORD_MESSAGE
+    )
+    .required()
+})

@@ -2,7 +2,7 @@ import { CustomError } from "../interfaces/customError"
 import { ICreateUser, IUpdateUser } from "../interfaces/users"
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from "../lib/constants"
 import { sendWelcomeEmail } from "../lib/mailer"
-import { generateActivationLink, handleError } from "../lib/utils"
+import { encryptPassword, generateActivationLink, handleError } from "../lib/utils"
 import { User } from "../schema/users"
 import { Types } from 'mongoose'
 import jwt from 'jsonwebtoken'
@@ -21,9 +21,10 @@ const createUser = async (reqBody: ICreateUser): Promise<string> => {
       email,
       password
     } = reqBody
+    const hashPassword = await encryptPassword(password)
     const user = {
       email,
-      password
+      password: hashPassword
     }
     const createdUser = await User.create(user)
     const userId = createdUser._id.toHexString()

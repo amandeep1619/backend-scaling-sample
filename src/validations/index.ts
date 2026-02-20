@@ -4,7 +4,8 @@ import { handleErrorResponse } from '../lib/utils';
 import { CustomError } from '../interfaces/customError';
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from '../lib/constants';
 import { AuthenticatedRequest } from '../interfaces/common';
-import { createUserValidationSchema, fetchUserDetailsSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
+import { createUserValidationSchema, fetchUserDetailsSchema, loginUserRequestSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
+import { createNoteBookSchema, noteBookIdSchema } from './noteBook.validations';
 
 const getRequestErrors = (schema: Joi.Schema) => {
   return (
@@ -66,6 +67,12 @@ export const validations = {
     createUserValidations: getRequestErrors(createUserValidationSchema),
     validateUserId: getRequestErrors(fetchUserDetailsSchema),
     updateUserValidations: getRequestErrors(updateUserValidationSchema),
-    verifyUserValidations: getRequestErrors(verifyUserDetailsSchema)
+    verifyUserValidations: getRequestErrors(verifyUserDetailsSchema),
+    loginUserValidation: getRequestErrors(loginUserRequestSchema)
+  },
+  noteBookValidations: {
+    createNoteBookValidations: getRequestErrors(createNoteBookSchema),
+    updateNoteBookValidations: getRequestErrors(createNoteBookSchema),
+    validateNoteBookIdValidations: getRequestErrors(noteBookIdSchema)
   }
 }
