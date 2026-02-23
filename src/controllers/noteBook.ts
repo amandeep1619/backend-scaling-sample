@@ -39,6 +39,16 @@ export const updateNoteBook = async (req: Request, res: Response) => {
 export const deleteNoteBook = async (req: Request, res: Response) => {
   try {
     await noteBookService.deleteNoteBook(req.params.id as string)
+    return handleSuccessResponse({ res, data: [], message: HTTP_STATUS_MESSAGES.OK })
+  } catch (error) {
+    return handleErrorResponse(res, error)
+  }
+}
+
+export const getNoteBookDetails = async (req: Request, res: Response) => {
+  try {
+    const noteBookDetails = await noteBookService.getNoteBookDetails(req.params.id as string)
+    return handleSuccessResponse({ res, data: [noteBookDetails], message: HTTP_STATUS_MESSAGES.OK})
   } catch (error) {
     return handleErrorResponse(res, error)
   }

@@ -5,11 +5,18 @@ import { handleError } from "../lib/utils"
 import { NoteBook } from "../schema/noteBooks"
 import { Types } from 'mongoose'
 import { userService } from "./users"
+import { Note } from "../schema/notes"
 
 const getNoteBookDetails = async (id: string) => {
   try {
-    return await NoteBook.findOne({ _id: new Types.ObjectId(id) })
+    return await NoteBook.findOne({ _id: new Types.ObjectId(id) }).populate({
+        path: 'notes',
+        model: Note,
+        select: 'title jsonBody'
+      })
+
   } catch (error) {
+    console.log("err0r -", error)
     return handleError(error)
   }
 }
@@ -81,12 +88,20 @@ const updateNoteBookDetails = async (id: string, reqBody: IUpdateNoteBook): Prom
 
 const deleteNoteBook = async (id: string): Promise<void> => {
   try {
-    await NoteBook.deleteOne({ _id: new Types.ObjectId(id) })
-    return
+    const objectId = new Types.ObjectId(id);
+
+    const noteBookDetails = await NoteBook.findById(objectId);
+
+    await Promise.all([
+      NoteBook.deleteOne({ _id: objectId }),
+      Note.deleteMany({ _id: { $in: noteBookDetails?.notes } })
+    ]);
+
+    return;
   } catch (error) {
-    return handleError(error)
+    return handleError(error);
   }
-}
+};
 
 const shareNoteBook = async (reqBody: IShareNoteBook): Promise<void> => {
   try {

@@ -18,7 +18,7 @@ const noteBookSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: USER_SCHEMA_NAME
     }],
-    notes:[
+    notes: [
       {
         type: Schema.Types.ObjectId,
         ref: NOTES_SCHEMA_NAME

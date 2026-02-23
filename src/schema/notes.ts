@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { NOTES_SCHEMA_NAME } from '../lib/constants';
+import { NOTES_SCHEMA_NAME, USER_SCHEMA_NAME } from '../lib/constants';
 
-const userSchema = new Schema(
+const noteSchema = new Schema(
   {
     title: {
       type: String,
@@ -11,9 +11,13 @@ const userSchema = new Schema(
       index: true
     },
     jsonBody: {
-      type: Object,
+      type: String,
       required: false,
       default: null
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: USER_SCHEMA_NAME
     }
   },
   {
@@ -23,4 +27,4 @@ const userSchema = new Schema(
 );
 
 
-export const User = model(NOTES_SCHEMA_NAME, userSchema);
+export const Note = model(NOTES_SCHEMA_NAME, noteSchema);
