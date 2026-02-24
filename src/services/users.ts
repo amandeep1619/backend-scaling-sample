@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken'
 
 const getUserDetails = async (id: string) => {
   try {
-    return await User.findOne({ _id: new Types.ObjectId(id)}).select("-password")
+    return await User.findOne({ _id: new Types.ObjectId(id) }).select("-password")
   } catch (error) {
     return handleError(error)
   }
@@ -43,16 +43,16 @@ const updateUserDetails = async (id: string, reqBody: IUpdateUser): Promise<stri
       age
     } = reqBody
     // checking existing user
-    const existingUser = await User.findOne({_id: new Types.ObjectId(id)})
+    const existingUser = await User.findOne({ _id: new Types.ObjectId(id) })
     if (!existingUser) {
       throw new CustomError({ message: HTTP_STATUS_MESSAGES.NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
     }
     // updating details
     existingUser.fullName = fullName,
-    existingUser.age = age
+      existingUser.age = age
     existingUser.updatedAt = new Date()
 
-    await User.updateOne({_id: new Types.ObjectId(id)}, existingUser)
+    await User.updateOne({ _id: new Types.ObjectId(id) }, existingUser)
 
     return id
   } catch (error) {
@@ -62,7 +62,7 @@ const updateUserDetails = async (id: string, reqBody: IUpdateUser): Promise<stri
 
 const deleteUserDetails = async (id: string): Promise<void> => {
   try {
-    await User.deleteOne({_id: new Types.ObjectId(id)})
+    await User.deleteOne({ _id: new Types.ObjectId(id) })
     // NEED TO DO CLEANUP HERE
     return
   } catch (error) {
@@ -70,21 +70,36 @@ const deleteUserDetails = async (id: string): Promise<void> => {
   }
 }
 
-const verifyUserAccount = async (token: string): Promise<void> =>{
+const verifyUserAccount = async (token: string): Promise<void> => {
   try {
-   const decoded = jwt.verify(token, process.env.JWT_ACTIVATION_SECRET!) as { sub: string };
-   const existingUser = await User.findOne({
-    _id: new Types.ObjectId(decoded.sub),
-    isActive: false
-   })
-   if (!existingUser) {
-    throw new CustomError({ message: "User is Already Active", status: HTTP_STATUS.OK })
-   }
-   await User.updateOne({
-    _id: new Types.ObjectId(decoded.sub)
-   },{
-    isActive: true
-   })
+    const decoded = jwt.verify(token, process.env.JWT_ACTIVATION_SECRET!) as { sub: string };
+    const existingUser = await User.findOne({
+      _id: new Types.ObjectId(decoded.sub),
+      isActive: false
+    })
+    if (!existingUser) {
+      throw new CustomError({ message: "User is Already Active", status: HTTP_STATUS.OK })
+    }
+    await User.updateOne({
+      _id: new Types.ObjectId(decoded.sub)
+    }, {
+      isActive: true
+    })
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+const searchUser = async (email: string) => {
+  try {
+    const usersList = await User.find({
+      $or: [
+        { email: { $regex: email, $options: 'i' } },
+        { fullName: { $regex: email, $options: 'i' } }
+      ]
+    }).select('email fullName')
+      .lean();
+    return usersList.map((u) => ({ ...u, _id: u._id.toHexString() }))
   } catch (error) {
     return handleError(error)
   }
@@ -95,5 +110,6 @@ export const userService = {
   getUserDetails,
   updateUserDetails,
   deleteUserDetails,
-  verifyUserAccount
+  verifyUserAccount,
+  searchUser
 }
