@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose';
-import { NOTE_BOOK_SCHEMA_NAME, NOTES_SCHEMA_NAME, USER_SCHEMA_NAME } from '../lib/constants';
+import { NOTE_BOOK_SCHEMA_NAME, NOTES_SCHEMA_NAME, USER_SCHEMA_NAME, WORKSPACE_SCHEMA_NAME } from '../lib/constants';
 
 const noteBookSchema = new Schema(
   {
-    userId: {
+    createdBy: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: USER_SCHEMA_NAME
@@ -23,7 +23,18 @@ const noteBookSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: NOTES_SCHEMA_NAME
       }
-    ]
+    ],
+    workSpaceId: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      default: null,
+      ref: WORKSPACE_SCHEMA_NAME
+    },
+    notesCount: {
+      type: Number,
+      required: false,
+      default: 0
+    }
   },
   {
     timestamps: true,

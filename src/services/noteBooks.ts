@@ -6,6 +6,8 @@ import { NoteBook } from "../schema/noteBooks"
 import { Types } from 'mongoose'
 import { userService } from "./users"
 import { Note } from "../schema/notes"
+import { User } from "../schema/users"
+import { WorkSpace } from "../schema/workspace"
 
 const getNoteBookDetails = async (id: string) => {
   try {
@@ -21,19 +23,45 @@ const getNoteBookDetails = async (id: string) => {
   }
 }
 
-const getNoteBookList = async (userId: string) => {
+const getNoteBookList = async (userId: string, workSpaceId?: string) => {
   try {
-    const noteBookList = await NoteBook.find({
-      $or: [
-        { userId: new Types.ObjectId(userId) },
-        { sharedWith: new Types.ObjectId(userId) }
-      ]
-    })
-      .populate('userId', 'name email')
-      .sort({ updatedAt: -1 });
-    return noteBookList
+    let query: any = {};
+
+    if (workSpaceId) {
+      query = { workSpaceId: new Types.ObjectId(workSpaceId) };
+    } else {
+      query = {
+        $or: [
+          { createdBy: new Types.ObjectId(userId) },
+          { sharedWith: new Types.ObjectId(userId) }
+        ]
+      };
+    }
+
+    const noteBookList = await NoteBook.find(query)
+      .populate([
+        { 
+          path: 'createdBy', 
+          model: User,
+          select: '_id fullName createdAt' 
+        },
+        { 
+          path: 'sharedWith', 
+          model: User,
+          select: '_id fullName' 
+        },
+        { 
+          path: 'workSpaceId',
+          model: WorkSpace,
+          select: '_id name' 
+        }
+      ])
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    return noteBookList;
   } catch (error) {
-    return handleError(error)
+    return handleError(error);
   }
 }
 
@@ -49,7 +77,7 @@ const createNoteBook = async (reqBody: ICreateNoteBook): Promise<string> => {
     }
 
     const noteBook = {
-      userId: userExistence._id,
+      createdBy: userExistence._id,
       name
     }
     const createdNoteBook = await NoteBook.create(noteBook)

@@ -6,6 +6,8 @@ import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from '../lib/constants';
 import { AuthenticatedRequest } from '../interfaces/common';
 import { createUserValidationSchema, fetchUserDetailsSchema, loginUserRequestSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
 import { createNoteBookSchema, noteBookIdSchema } from './noteBook.validations';
+import { createNoteSchema, fetchNoteDetailsSchema, updateNoteValidationSchema } from './notes.validations';
+import { createWorkSpaceValidationSchema, fetchWorkSpaceDetailsSchema, updateWorkSpaceValidationSchema } from './workSpace.validations';
 
 const getRequestErrors = (schema: Joi.Schema) => {
   return (
@@ -74,5 +76,15 @@ export const validations = {
     createNoteBookValidations: getRequestErrors(createNoteBookSchema),
     updateNoteBookValidations: getRequestErrors(createNoteBookSchema),
     validateNoteBookIdValidations: getRequestErrors(noteBookIdSchema)
+  },
+  noteValidations: {
+    createNoteValidations: getRequestErrors(createNoteSchema),
+    validateNoteId: getRequestErrors(fetchNoteDetailsSchema),
+    updateNoteValidation: getRequestErrors(updateNoteValidationSchema)
+  },
+  workSpaceValdations: {
+    createWorkSpaceValidations: getRequestErrors(createWorkSpaceValidationSchema),
+    validateWorkSpaceId: getRequestErrors(fetchWorkSpaceDetailsSchema),
+    updateWorkSpaceValidations: getRequestErrors(updateWorkSpaceValidationSchema) 
   }
 }

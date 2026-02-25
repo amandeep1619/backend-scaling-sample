@@ -28,6 +28,7 @@ export const INVALID_PASSWORD_MESSAGE = 'Password must be at least 8 characters 
 
 /*********************** SCHEMA NAMES *********************/
 
-export const USER_SCHEMA_NAME = "User"
+export const USER_SCHEMA_NAME = "users"
 export const NOTE_BOOK_SCHEMA_NAME = "note-books"
 export const NOTES_SCHEMA_NAME = "notes"
+export const WORKSPACE_SCHEMA_NAME = "work-spaces"

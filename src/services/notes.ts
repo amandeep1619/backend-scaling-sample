@@ -9,32 +9,33 @@ import { NoteBook } from "../schema/noteBooks"
 
 const createNote = async (reqBody: ICreateNote): Promise<string> => {
   try {
-    const userExistence = await User.findOne({ _id: reqBody.userId })
+    const { title, jsonBody, userId, notebookId } = reqBody;
+
+    const userExistence = await User.findById(userId).select('_id');
     if (!userExistence) {
       throw new CustomError({
         message: "User not found",
         status: HTTP_STATUS.NOT_FOUND
-      })
+      });
     }
-    const noteBookExistence = await NoteBook.findOne({ _id: new Types.ObjectId(reqBody.notebookId) })
-    if (!noteBookExistence) {
-      throw new CustomError({
-        message: "Notebook not found",
-        status: HTTP_STATUS.NOT_FOUND
-      })
-    }
-    const { title, jsonBody } = reqBody
-    const note = {
+
+    const createdNote = await Note.create({
       title,
       jsonBody,
       userId: userExistence._id
-    }
-    const createdNote = await Note.create(note)
-    noteBookExistence.notes.push(createdNote._id)
-    await NoteBook.updateOne({ _id: noteBookExistence._id }, noteBookExistence)
-    return createdNote._id.toHexString()
+    });
+
+    await NoteBook.findOneAndUpdate(
+      { _id: new Types.ObjectId(notebookId) },
+      {
+        $push: { notes: createdNote._id },
+        $inc: { notesCount: 1 }
+      }
+    );
+
+    return createdNote._id.toHexString();
   } catch (error) {
-    return handleError(error)
+    return handleError(error);
   }
 }
 
@@ -68,11 +69,29 @@ const updateNote = async (reqBody: IUpdateNote): Promise<string> => {
 
 const deleteNote = async (id: string): Promise<void> => {
   try {
-    await Note.deleteOne({ _id: new Types.ObjectId(id) })
+    const noteObjectId = new Types.ObjectId(id);
+
+    const deletionResult = await Note.deleteOne({ _id: noteObjectId });
+
+    if (deletionResult.deletedCount === 0) {
+      throw new CustomError({
+        message: "Note not found",
+        status: HTTP_STATUS.NOT_FOUND
+      });
+    }
+    await NoteBook.findOneAndUpdate(
+      { notes: noteObjectId },
+      {
+        $pull: { notes: noteObjectId },
+        $inc: { notesCount: -1 }
+      }
+    );
+
   } catch (error) {
-    return handleError(error)
+    return handleError(error);
   }
 }
+
 export const noteService = {
   createNote,
   getNoteDetails,

@@ -1,7 +1,12 @@
 import Joi from 'joi'
 
 export const createNoteBookSchema = Joi.object({
-  name: Joi.string().required()
+  name: Joi.string().required(),
+  workSpaceId: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .messages({
+      'string.pattern.base': 'Invalid work space id'
+    })
 })
 
 export const noteBookIdSchema = Joi.object({
