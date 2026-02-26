@@ -19,17 +19,19 @@ const createUser = async (reqBody: ICreateUser): Promise<string> => {
   try {
     const {
       email,
-      password
+      password,
+      fullName
     } = reqBody
     const hashPassword = await encryptPassword(password)
     const user = {
       email,
+      fullName: fullName || "",
       password: hashPassword
     }
     const createdUser = await User.create(user)
     const userId = createdUser._id.toHexString()
     const activationLink = generateActivationLink(userId)
-    await sendWelcomeEmail(email, "buddy", activationLink)
+    await sendWelcomeEmail(email, fullName || "Buddy", activationLink)
     return userId
   } catch (error) {
     return handleError(error)
