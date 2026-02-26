@@ -26,7 +26,7 @@ const createNote = async (reqBody: ICreateNote): Promise<string> => {
     });
 
     await NoteBook.findOneAndUpdate(
-      { _id: new Types.ObjectId(notebookId) },
+      { _id: notebookId },
       {
         $push: { notes: createdNote._id },
         $inc: { notesCount: 1 }

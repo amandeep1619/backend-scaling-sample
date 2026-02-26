@@ -11,26 +11,27 @@ import { WorkSpace } from "../schema/workspace"
 
 const getNoteBookDetails = async (id: string) => {
   try {
-    return await NoteBook.findOne({ _id: new Types.ObjectId(id) }).populate({
+    const notebook = await NoteBook.findOne({ _id: new Types.ObjectId(id) })
+      .populate({
         path: 'notes',
         model: Note,
         select: 'title jsonBody'
       })
-
+      .lean();
+    return notebook;
   } catch (error) {
-    console.log("err0r -", error)
-    return handleError(error)
+    return handleError(error);
   }
 }
 
 const getNoteBookList = async (userId: string, workSpaceId?: string) => {
   try {
     let query: any = {};
-
     if (workSpaceId) {
       query = { workSpaceId: new Types.ObjectId(workSpaceId) };
     } else {
       query = {
+        workSpaceId: null,
         $or: [
           { createdBy: new Types.ObjectId(userId) },
           { sharedWith: new Types.ObjectId(userId) }
@@ -40,20 +41,20 @@ const getNoteBookList = async (userId: string, workSpaceId?: string) => {
 
     const noteBookList = await NoteBook.find(query)
       .populate([
-        { 
-          path: 'createdBy', 
+        {
+          path: 'createdBy',
           model: User,
-          select: '_id fullName createdAt' 
+          select: '_id fullName createdAt'
         },
-        { 
-          path: 'sharedWith', 
+        {
+          path: 'sharedWith',
           model: User,
-          select: '_id fullName' 
+          select: '_id fullName'
         },
-        { 
+        {
           path: 'workSpaceId',
           model: WorkSpace,
-          select: '_id name' 
+          select: '_id name'
         }
       ])
       .sort({ updatedAt: -1 })
@@ -75,10 +76,10 @@ const createNoteBook = async (reqBody: ICreateNoteBook): Promise<string> => {
     if (!userExistence) {
       throw new CustomError({ message: "User not Found", status: HTTP_STATUS.NOT_FOUND })
     }
-
     const noteBook = {
       createdBy: userExistence._id,
-      name
+      name,
+      ...(reqBody.workSpaceId && { workSpaceId: reqBody.workSpaceId })
     }
     const createdNoteBook = await NoteBook.create(noteBook)
     const noteBookId = createdNoteBook._id.toHexString()

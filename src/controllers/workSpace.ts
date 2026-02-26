@@ -26,7 +26,7 @@ export const getWorkSpaceDetails = async (req: Request, res: Response) => {
 
 export const createWorkSpace = async (req: Request, res: Response) => {
   try {
-    const createdId = await workSpaceService.createWorkSpace(req.body)
+    const createdId = await workSpaceService.createWorkSpace({...req.body, userId: (req as AuthenticatedRequest).user.sub})
     return handleSuccessResponse({ res, status: HTTP_STATUS.CREATED, data: [{ id: createdId }], message: HTTP_STATUS_MESSAGES.CREATED })
   } catch (error) {
     return handleErrorResponse(res, error)

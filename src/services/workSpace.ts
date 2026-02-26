@@ -59,7 +59,7 @@ const createWorkSpace = async (reqBody: ICreateWorkSpace): Promise<string> => {
     }
 
     const workSpace = {
-      createdBy: userExistence._id,
+      ownerId: userExistence._id,
       name
     }
     const createdWorkSpace = await WorkSpace.create(workSpace)

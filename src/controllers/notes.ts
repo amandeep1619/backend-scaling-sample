@@ -3,10 +3,11 @@ import { handleErrorResponse, handleSuccessResponse } from "../lib/utils";
 import { noteService } from "../services/notes";
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from "../lib/constants";
 import { CustomError } from "../interfaces/customError";
+import { AuthenticatedRequest } from "../interfaces/common";
 
 export const createNote = async (req: Request, res: Response) => {
   try {
-    const createdId = await noteService.createNote(req.body)
+    const createdId = await noteService.createNote({...req.body, userId: (req as AuthenticatedRequest).user.sub})
     return handleSuccessResponse({ res, data: [{ id: createdId }], status: HTTP_STATUS.CREATED, message: HTTP_STATUS_MESSAGES.CREATED })
   } catch (error) {
     return handleErrorResponse(res, error)

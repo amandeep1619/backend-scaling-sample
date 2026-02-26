@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import { noteBookIdSchema } from './noteBook.validations';
 
 
 const noteIdValidation = Joi.string()
@@ -22,10 +23,17 @@ export const fetchNoteDetailsSchema = Joi.object({
 
 export const createNoteSchema = Joi.object({
   title: titleValidation,
-  jsonBody: jsonBodyValidation
+  jsonBody: jsonBodyValidation,
+  notebookId: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Invalid note book id'
+    })
 })
 
 export const updateNoteValidationSchema = Joi.object({
   id: noteIdValidation,
-  title: titleValidation
+  title: titleValidation,
+  jsonBody: jsonBodyValidation,
 });
