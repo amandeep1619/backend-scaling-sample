@@ -4,7 +4,7 @@ import { handleErrorResponse } from '../lib/utils';
 import { CustomError } from '../interfaces/customError';
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from '../lib/constants';
 import { AuthenticatedRequest } from '../interfaces/common';
-import { createUserValidationSchema, fetchUserDetailsSchema, loginUserRequestSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
+import { createUserValidationSchema, fetchUserDetailsSchema, forgotPasswordValidationSchema, loginUserRequestSchema, resetPasswordValidationSchema, updateUserValidationSchema, verifyUserDetailsSchema } from './user.validations';
 import { createNoteBookSchema, noteBookIdSchema } from './noteBook.validations';
 import { createNoteSchema, fetchNoteDetailsSchema, updateNoteValidationSchema } from './notes.validations';
 import { createWorkSpaceValidationSchema, fetchWorkSpaceDetailsSchema, updateWorkSpaceValidationSchema } from './workSpace.validations';
@@ -70,7 +70,9 @@ export const validations = {
     validateUserId: getRequestErrors(fetchUserDetailsSchema),
     updateUserValidations: getRequestErrors(updateUserValidationSchema),
     verifyUserValidations: getRequestErrors(verifyUserDetailsSchema),
-    loginUserValidation: getRequestErrors(loginUserRequestSchema)
+    loginUserValidation: getRequestErrors(loginUserRequestSchema),
+    resetPasswordValidations: getRequestErrors(resetPasswordValidationSchema),
+    forgotPasswordvalidations: getRequestErrors(forgotPasswordValidationSchema)
   },
   noteBookValidations: {
     createNoteBookValidations: getRequestErrors(createNoteBookSchema),

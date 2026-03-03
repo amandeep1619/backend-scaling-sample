@@ -10,6 +10,19 @@ export interface IUpdateUser {
 }
 
 export interface IUpdateUserDetails {
-  id: string
-  
+  id: string 
+}
+
+export interface IResetPassword {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+  userId: string
+}
+
+export interface IforgotPassword {
+  email?: string
+  newPassword?: string
+  confirmPassword?: string
+  userId?: string
 }

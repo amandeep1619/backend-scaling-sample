@@ -1,5 +1,5 @@
 import { Express } from "express"
-import userRoutes from './userRoutes'
+import userRoutes from './users'
 import noteBookRoutes from './noteBooks'
 import notesRoutes from './notes'
 import workSpaceRoutes from './workSpace'

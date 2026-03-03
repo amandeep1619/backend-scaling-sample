@@ -1,11 +1,12 @@
 import { CustomError } from "../interfaces/customError"
-import { ICreateUser, IUpdateUser } from "../interfaces/users"
+import { ICreateUser, IforgotPassword, IResetPassword, IUpdateUser } from "../interfaces/users"
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from "../lib/constants"
-import { sendWelcomeEmail } from "../lib/mailer"
-import { encryptPassword, generateActivationLink, handleError } from "../lib/utils"
+import { sendForgotPasswordEmail, sendWelcomeEmail } from "../lib/mailer"
+import { encryptPassword, generateActivationLink, generateForgotPasswordLink, handleError } from "../lib/utils"
 import { User } from "../schema/users"
 import { Types } from 'mongoose'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 const getUserDetails = async (id: string) => {
   try {
@@ -107,11 +108,66 @@ const searchUser = async (email: string) => {
   }
 }
 
+
+const resetPassword = async (reqBody: IResetPassword) => {
+  try {
+    const { oldPassword, newPassword, userId } = reqBody
+    const existingUser = await User.findOne({ _id: new Types.ObjectId(userId) })
+    if (!existingUser) {
+      throw new CustomError({ message: "User not found", status: HTTP_STATUS.NOT_FOUND })
+    }
+    const isPasswordMatch = await bcrypt.compare(oldPassword, existingUser.password);
+
+    if (!isPasswordMatch) {
+      throw new CustomError({
+        message: "Password not matched",
+        status: HTTP_STATUS.BAD_REQUEST
+      });
+    }
+    const hashPassword = await encryptPassword(newPassword)
+    existingUser.password = hashPassword
+    await User.updateOne({ _id: existingUser._id }, existingUser)
+    return existingUser._id.toHexString()
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+const forgotPassword = async (reqBody: IforgotPassword) => {
+  try {
+    if (reqBody.email) {
+      const { email } = reqBody
+      const existingUser = await User.findOne({ email })
+      if (!existingUser) {
+        throw new CustomError({ message: "User not found", status: HTTP_STATUS.NOT_FOUND })
+      }
+
+      const activationLink = generateForgotPasswordLink(existingUser._id.toHexString())
+      await sendForgotPasswordEmail(email, existingUser.fullName as string, activationLink)
+      return
+    } else if (reqBody.newPassword && reqBody.confirmPassword && reqBody.userId) {
+      
+      const { newPassword, confirmPassword, userId } = reqBody
+      const hashPassword = await encryptPassword(newPassword)
+      const existingUser = await User.findOne({ _id: new Types.ObjectId(userId) })
+      if (!existingUser) {
+        throw new CustomError({ message: "User not found", status: HTTP_STATUS.NOT_FOUND })
+      }
+      existingUser.password = hashPassword
+      await User.updateOne({ _id: existingUser._id }, existingUser)
+    }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
 export const userService = {
   createUser,
   getUserDetails,
   updateUserDetails,
   deleteUserDetails,
   verifyUserAccount,
-  searchUser
+  searchUser,
+  resetPassword,
+  forgotPassword
 }

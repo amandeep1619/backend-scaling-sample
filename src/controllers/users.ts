@@ -4,6 +4,7 @@ import { userService } from "../services/users";
 import { HTTP_STATUS, HTTP_STATUS_MESSAGES } from "../lib/constants";
 import { CustomError } from "../interfaces/customError";
 import { authService } from "../services/auth";
+import { AuthenticatedRequest } from "../interfaces/common";
 const dummyUsers = [
   { fullName: "Arjun Mehta", email: "arjun.mehta@example.com", password: "Password123!" },
   { fullName: "Priya Sharma", email: "priya.sharma@testmail.com", password: "Password123!" },
@@ -119,6 +120,38 @@ export const searchUser = async (req: Request, res: Response) => {
     const searchTerm = req.query.searchTerm
     const searchList = await userService.searchUser(searchTerm as string)
     return handleSuccessResponse({ res, data: searchList, message: HTTP_STATUS_MESSAGES.OK })
+  } catch (error) {
+    return handleErrorResponse(res, error)
+  }
+}
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    await userService.resetPassword({ ...req.body, userId: (req as AuthenticatedRequest).user.sub })
+    return handleSuccessResponse({ res, data: [], message: HTTP_STATUS_MESSAGES.OK })
+  } catch (error) {
+    return handleErrorResponse(res, error)
+  }
+}
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const queryParam = req.query.step || 'step1'
+    if (queryParam === 'step1') {
+      const reqBody = {
+        email: req.body.email
+      }
+      await userService.forgotPassword(reqBody)
+      return handleSuccessResponse({ res, data: [], message: "Email sent successfully" })
+    } else {
+      const reqBody = {
+        newPassword: req.body.newPassword,
+        confirmPassword: req.body.confirmPassword,
+        userId: (req as AuthenticatedRequest).user.sub
+      }
+      await userService.forgotPassword(reqBody)
+      return handleSuccessResponse({ res, data: [], message: "Password changed successfully" })
+    }
   } catch (error) {
     return handleErrorResponse(res, error)
   }

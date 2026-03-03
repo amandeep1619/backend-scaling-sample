@@ -37,8 +37,43 @@ export const authGuard = (req: Request, res: Response, next: NextFunction) => {
         status: HTTP_STATUS.UNAUTHORIZED
       }));
     }
+    return handleErrorResponse(res, error);
+  }
+};
 
-    // 4. Handle other errors (like our manual UNAUTHORIZED throw)
+export const forgotPasswordGuard = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.get('authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new CustomError({ 
+        message: HTTP_STATUS_MESSAGES.UNAUTHORIZED, 
+        status: HTTP_STATUS.UNAUTHORIZED 
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const secret = process.env.JWT_ACTIVATION_SECRET as string;
+
+    const decoded = jwt.verify(token, secret);
+    (req as any).user = decoded;
+
+    next();
+  } catch (error: any) {
+    // 3. Differentiate JWT-specific errors within the main catch
+    if (error instanceof TokenExpiredError) {
+      return handleErrorResponse(res, new CustomError({
+        message: "Link is Expired please try again later.",
+        status: HTTP_STATUS.UNAUTHORIZED
+      }));
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      return handleErrorResponse(res, new CustomError({
+        message: "Link is Expired please try again later.",
+        status: HTTP_STATUS.UNAUTHORIZED
+      }));
+    }
     return handleErrorResponse(res, error);
   }
 };

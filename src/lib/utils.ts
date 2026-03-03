@@ -111,3 +111,13 @@ export const validateToken = (token: string): string => {
   const verifyReq = jwt.verify(token, process.env.JWT_SESSION_KEY!)
   return verifyReq.sub as string
 }
+
+export const generateForgotPasswordLink = (userId: string): string => {
+  const token = jwt.sign(
+    { sub: userId },
+    process.env.JWT_ACTIVATION_SECRET!,
+    { expiresIn: '5m' }
+  );
+  const url = process.env.FORGOT_PASSWORD_REDIRECT_URL_LOCAL as string + "?token=" + token
+  return url
+};
